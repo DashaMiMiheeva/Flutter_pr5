@@ -1,0 +1,98 @@
+// lib/features/expenses/expenses_container.dart
+import 'package:flutter/material.dart';
+import 'models/expense.dart';
+import 'screens/expenses_list_screen.dart';
+import 'screens/add_expense_screen.dart';
+
+enum _Screen { list, add }
+
+class ExpensesContainer extends StatefulWidget {
+  const ExpensesContainer({Key? key}) : super(key: key);
+
+  @override
+  State<ExpensesContainer> createState() => _ExpensesContainerState();
+}
+
+class _ExpensesContainerState extends State<ExpensesContainer> {
+  _Screen _current = _Screen.list;
+  final List<Expense> _expenses = [];
+  Expense? _recentlyDeleted;
+  int? _recentlyDeletedIndex;
+
+  // simple categories for example
+  final List<String> _categories = ['Еда', 'Транспорт', 'Покупки', 'Развлечения', 'Прочее'];
+
+  void _showAdd() => setState(() => _current = _Screen.add);
+  void _showList() => setState(() => _current = _Screen.list);
+
+  void _createExpense({
+    required double amount,
+    required String category,
+    String? description,
+    required DateTime date,
+  }) {
+    final newExpense = Expense(
+      id: DateTime.now().microsecondsSinceEpoch.toString(),
+      amount: amount,
+      category: category,
+      description: description,
+      date: date,
+    );
+    setState(() {
+      _expenses.insert(0, newExpense);
+      _current = _Screen.list;
+    });
+  }
+
+  void _deleteExpense(String id) {
+    final index = _expenses.indexWhere((e) => e.id == id);
+    if (index == -1) return;
+    setState(() {
+      _recentlyDeleted = _expenses.removeAt(index);
+      _recentlyDeletedIndex = index;
+    });
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Расход удалён'),
+        action: SnackBarAction(
+          label: 'Отменить',
+          onPressed: () {
+            if (_recentlyDeleted != null && _recentlyDeletedIndex != null) {
+              setState(() {
+                _expenses.insert(_recentlyDeletedIndex!, _recentlyDeleted!);
+                _recentlyDeleted = null;
+                _recentlyDeletedIndex = null;
+              });
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child;
+    switch (_current) {
+      case _Screen.list:
+        child = ExpensesListScreen(
+          expenses: List.unmodifiable(_expenses),
+          onAddTap: _showAdd,
+          onDelete: _deleteExpense,
+          onEdit: null,
+        );
+        break;
+      case _Screen.add:
+        child = AddExpenseScreen(
+          categories: _categories,
+          onSave: ({required amount, required category, description, required date}) {
+            _createExpense(amount: amount, category: category, description: description, date: date);
+          },
+        );
+        break;
+    }
+
+    return AnimatedSwitcher(duration: const Duration(milliseconds: 200), child: child);
+  }
+}
