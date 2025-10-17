@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/expense.dart';
 import '../widgets/expense_row.dart';
+import '../widgets/expense_table.dart';
 
 class ExpensesListScreen extends StatelessWidget {
   final List<Expense> expenses;
@@ -81,44 +82,10 @@ class ExpensesListScreen extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: expenses.isEmpty
-                ? const Center(
-              child: Text(
-                'Нет расходов за выбранный период. Нажмите + чтобы добавить новый',
-                textAlign: TextAlign.center,
-              ),
-            )
-                : ListView.builder(
-              itemCount: expenses.length,
-              itemBuilder: (context, index) {
-                final e = expenses[index];
-                return Dismissible(
-                  key: ValueKey(e.id),
-                  direction: DismissDirection.endToStart,
-                  background: Container(
-                    color: Colors.red,
-                    alignment: Alignment.centerRight,
-                    padding: const EdgeInsets.only(right: 20),
-                    child: const Icon(Icons.delete, color: Colors.white),
-                  ),
-                  onDismissed: (_) {
-                    onDelete(e.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: const Text('Расход удалён'),
-                        action: SnackBarAction(
-                          label: 'Отменить',
-                          onPressed: () {},
-                        ),
-                      ),
-                    );
-                  },
-                  child: ExpenseRow(
-                    expense: e,
-                    onTap: onEdit != null ? () => onEdit!(e) : null,
-                  ),
-                );
-              },
+            child: ExpenseTable(
+              expenses: expenses,
+              onDelete: onDelete,
+              onTap: onEdit,
             ),
           ),
         ],
