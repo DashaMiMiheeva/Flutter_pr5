@@ -1,4 +1,3 @@
-// lib/features/expenses/expenses_container.dart
 import 'package:flutter/material.dart';
 import 'models/expense.dart';
 import 'screens/expenses_list_screen.dart';
@@ -19,11 +18,31 @@ class _ExpensesContainerState extends State<ExpensesContainer> {
   Expense? _recentlyDeleted;
   int? _recentlyDeletedIndex;
 
-  // simple categories for example
   final List<String> _categories = ['Еда', 'Транспорт', 'Покупки', 'Развлечения', 'Прочее'];
+
+  DateTime? _selectedDate; // null = все расходы
 
   void _showAdd() => setState(() => _current = _Screen.add);
   void _showList() => setState(() => _current = _Screen.list);
+
+  void _setFilterDate(DateTime date) {
+    setState(() => _selectedDate = date);
+  }
+
+  void _clearFilter() {
+    setState(() => _selectedDate = null);
+  }
+
+  List<Expense> get _filteredExpenses {
+    if (_selectedDate == null) return _expenses;
+
+    return _expenses.where((e) {
+      final sameDay = e.date.year == _selectedDate!.year &&
+          e.date.month == _selectedDate!.month &&
+          e.date.day == _selectedDate!.day;
+      return sameDay;
+    }).toList();
+  }
 
   void _createExpense({
     required double amount,
@@ -77,10 +96,13 @@ class _ExpensesContainerState extends State<ExpensesContainer> {
     switch (_current) {
       case _Screen.list:
         child = ExpensesListScreen(
-          expenses: List.unmodifiable(_expenses),
+          expenses: List.unmodifiable(_filteredExpenses),
           onAddTap: _showAdd,
           onDelete: _deleteExpense,
           onEdit: null,
+          onFilter: _setFilterDate,
+          onClearFilter: _clearFilter,
+          selectedDate: _selectedDate,
         );
         break;
       case _Screen.add:

@@ -15,7 +15,7 @@ class ExpensesApp extends StatelessWidget {
       title: 'Учёт расходов',
       theme: ThemeData(
         primaryColor: const Color(0xFFFFC1CC),
-        scaffoldBackgroundColor: const Color(0xFFFFF0F5), // фон
+        scaffoldBackgroundColor: const Color(0xFFFFF0F5),
         appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFFFC1CC),
           foregroundColor: Colors.white,

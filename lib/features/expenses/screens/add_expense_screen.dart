@@ -1,4 +1,3 @@
-// lib/features/expenses/screens/add_expense_screen.dart
 import 'package:flutter/material.dart';
 
 class AddExpenseScreen extends StatefulWidget {
